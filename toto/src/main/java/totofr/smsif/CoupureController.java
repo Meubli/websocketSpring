@@ -1,5 +1,6 @@
 package totofr.smsif;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,5 +27,15 @@ public class CoupureController {
     public void retablir(){
     	service.setCouper(false);
     }
+	
+	@GetMapping(path="/generate")
+	public String generer() {
+		String topic = "";
+		do {
+			topic = RandomStringUtils.randomAlphabetic(5);
+		}while(service.getEnableTopics().contains(topic));
+		service.getEnableTopics().add(topic);
+		return topic;
+	}
 
 }
