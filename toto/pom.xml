@@ -1,0 +1,289 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 ./xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fr.smsif</groupId>
+	<artifactId>WebsocketBackend</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<name>WebsocketBackend</name>
+	<organization>
+		<name>SMSIF-RH</name>
+	</organization>
+	<description>Partie métier de WhiteAppServer</description>
+
+	<!-- Liste des propriétés utilisées dans Maven -->
+	<properties>
+		<spring.boot.parent.version>2.3.9.RELEASE</spring.boot.parent.version>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<failOnMissingWebXml>false</failOnMissingWebXml>
+
+		<!-- Autres versions -->
+		<org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
+		<org.projectlombok.version>1.18.16</org.projectlombok.version>
+		<springfox-swagger2.version>2.7.0</springfox-swagger2.version>
+		<io.jsonwebtoken.jjwt.version>0.9.1</io.jsonwebtoken.jjwt.version>
+		<commons-collections4>4.4</commons-collections4>
+		<commons-io>2.8.0</commons-io>
+		<commons-lang3>2.6</commons-lang3>
+		<org.mockito>3.6.28</org.mockito>
+		<oauth2-oidc-sdk>9.2.2</oauth2-oidc-sdk>
+		<nimbus-jose-jwt>9.6.1</nimbus-jose-jwt>
+		<java.melody>1.86.0</java.melody>
+		<opencsv.version>3.9</opencsv.version>
+
+		<!-- Maven plugins -->
+		<org.apache.maven.plugins.version>3.6.0</org.apache.maven.plugins.version>
+
+		<!-- Projets internes -->
+		<referentiel-adonis.version>6.22</referentiel-adonis.version>
+
+		<!-- Variables de configuration -->
+		<jacoco.ut.execution.data.file>${project.build.directory}/jacoco.exec</jacoco.ut.execution.data.file>
+		<maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
+		<maven.surefire.report.plugin.version>2.22.2</maven.surefire.report.plugin.version>
+
+	</properties>
+
+	<dependencies>
+
+		<!-- Dépendance avec le starter parent de base -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+
+		<!-- Starter web par défaut. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+
+		<!-- Nécessaire au tomcat embarqué. A excluse en mode int, prod... -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- Nécessaire au tomcat embarqué. A excluse en mode int, prod... -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- Mise en place de lombok fournissant des annotations pour faciliter 
+			le code des beans. Exemple : @Getter, @Setter, @Data... -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+
+
+
+
+
+
+		<!-- Commons lang3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<!-- Commons io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io}</version>
+		</dependency>
+
+		<!-- Commons collection -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>${commons-collections4}</version>
+		</dependency>
+
+
+
+
+		<!-- Mise en place de mapStruct permettant de faire du mapping obejt to 
+			objet en utilisant pre processor -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${org.mapstruct.version}</version>
+		</dependency>
+
+
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- If we don't make use of the parent POM, we can still benefit from 
+				dependency -->
+			<!-- management by adding the spring-boot-dependencies artifact with scope=import: -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>2.3.9.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+
+		<pluginManagement>
+			<plugins>
+				<!-- Permet d'analyser la couverture de code des tests unitaires -->
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.2</version>
+					<executions>
+						<!-- Prepares the property pointing to the JaCoCo runtime agent which 
+							is passed as VM argument when Maven the Surefire plugin is executed. -->
+						<execution>
+							<id>pre-unit-test</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+							<configuration>
+								<!-- Sets the path to the file which contains the execution data. -->
+								<destFile>${jacoco.ut.execution.data.file}</destFile>
+								<!-- Sets the name of the property containing the settings for JaCoCo 
+									runtime agent. -->
+								<propertyName>surefireArgLine</propertyName>
+							</configuration>
+						</execution>
+						<!-- Ensures that the code coverage report for unit tests is created 
+							after unit tests have been run. -->
+						<execution>
+							<id>post-unit-test</id>
+							<phase>test</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+							<configuration>
+								<!-- Sets the path to the file which contains the execution data. -->
+								<dataFile>${jacoco.ut.execution.data.file}</dataFile>
+								<!-- Sets the output directory for the code coverage report. -->
+								<outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<!-- Prise en compte de lombok et de mapStruct dans le build -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${org.apache.maven.plugins.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+
+					<generatedSourcesDirectory>generated-sources</generatedSourcesDirectory>
+					<generatedTestSourcesDirectory>generated-test-sources</generatedTestSourcesDirectory>
+
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${org.projectlombok.version}</version>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
+					<compilerArgs>
+						<arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
+						<arg>-Amapstruct.defaultComponentModel=spring</arg>
+						<!-- cf. https://www.baeldung.com/mapstruct-ignore-unmapped-properties -->
+						<arg>-Amapstruct.unmappedTargetPolicy=IGNORE</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+
+			<!-- Configuration sans pom global -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.parent.version}</version>
+
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+			</plugin>
+
+
+
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			<!-- Execution des tests unitaires -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven.surefire.plugin.version}</version>
+				<configuration>
+					<testFailureIgnore>true</testFailureIgnore>
+					<!-- on redirige les logs des tests vers des fichiers pour que les logs 
+						des builds archivés dans l'intégration continue ne soient pas trop gros et 
+						ne consomment pas trop d'espace disque -->
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<!-- On set la variable test.h2 afin d'executer les tests sur la base 
+						H2 -->
+					<argLine>-Xmx128m -Dtest.h2=true ${surefireArgLine}</argLine>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<!-- -Section création des rapports -->
+	<reporting>
+		<plugins>
+
+			<!-- Rapport des tests unitaires -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>${maven.surefire.report.plugin.version}</version>
+				<configuration>
+					<linkXRef>false</linkXRef>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report-only</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+		</plugins>
+	</reporting>
+
+</project>
